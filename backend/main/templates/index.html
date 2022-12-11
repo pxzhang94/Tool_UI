@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="text/html; charset=utf-8" />
+    
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+    
+    <title>AID</title>
+    
+    <link href="/static/css/bootstrap.css" rel="stylesheet" />
+    <link href="/static/css/coming-sssoon.css" rel="stylesheet" />    
+    
+    <!--     Fonts     -->
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Grand+Hotel' rel='stylesheet' type='text/css'>
+    
+</head>
+<script type="text/javascript">
+    function Diagnose() {
+        document.getElementById("form1").submit();
+        return true;
+    }
+    
+    function getKey(){
+    	if(event.keyCode==13){
+            Search();
+        }
+	}
+
+	function set_placeholder(e) {
+        var filename = $(e).val();
+        if (filename) {
+            var idx = filename.lastIndexOf("\\");
+            filename = filename.substring(idx + 1);
+            {#$(e).parent().prev().prop("placeholder", filename);#}
+            $(e).prev().prop("placeholder", filename);
+        }
+    }
+
+    function monitor_upload(e) {
+        $(e).next().click();
+    }
+
+</script>
+    
+<body>
+<nav class="navbar navbar-transparent navbar-fixed-top" role="navigation">  
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+      <ul class="nav navbar-nav navbar-right">
+             <li>
+                 <a href="/contact" target="_Self" style="color:#000;">
+                    <i class="fa fa-envelope-o"></i>
+                    Contact
+                </a>
+            </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+         <li class="dropdown">
+              <a href="/" style="color:#000;">
+                <i class="fa fa-home"></i>
+                AID
+              </a>
+        </li>
+      </ul>
+      
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container -->
+</nav>
+{#<div class="main" style="background-image: url('/static/images/default.jpg')">#}
+<div class="main" style="background-image: none">
+
+{#    <div class="cover black" data-color="black"></div>#}
+     
+<!--   You can change the black color for the filter with those colors: blue, green, red, orange       -->
+
+    <div class="container">
+        <h1 class="logo" style="color:#000;">
+            AID
+        </h1>
+        
+        <div class="content">
+            <h4 class="motto" style="color:#000000;">Diagnosis tool for AI</h4>
+            <div class="subscribe">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="col-lg-2"></div>
+                        <div class="col-lg-8">
+                            <form class="form-inline" enctype="multipart/form-data" role="form" action="/index" method="post" id ="form1" >
+                                <div class="form-group col-lg-10" style="width:50%">
+
+                                    <div>
+                                        <label style="width:30%">Model path</label>
+                                        <input type="text" class="form-control" style="width:65%" onclick="monitor_upload(this)" placeholder="Please select the model path"/>
+                                        <input type="file" id="forexIO_file1" onchange="set_placeholder(this)" style="display:none" name="mPath" />
+                                    </div>
+
+                                    <div style = "margin-top: 15px">
+                                        <label style="width:30%">Random noise</label>
+                                        <select class="form-control" style="width:65%" name="rNoise">
+                                          <option>None</option>
+                                          <option>Gaussian noise</option>
+                                        </select>
+                                    </div>
+                                    <div style = "margin-top: 15px">
+                                        <label style="width:30%">Noise degree</label>
+{#                                        TODO: dynamic degree for different perturbation#}
+                                        <select class="form-control" style="width:65%" name="rParam">
+                                          <option>0.1</option>
+                                          <option>0.2</option>
+                                          <option>0.3</option>
+                                          <option>0.4</option>
+                                          <option>0.5</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-lg-10" style="width:50%">
+                                    <div>
+                                        <label style="width:30%">Data path</label>
+                                        <input type="text" class="form-control" style="width:65%" onclick="monitor_upload(this)" placeholder="Please select the data path" />
+                                        <input type="file" id="forexIO_file2" onchange="set_placeholder(this)" style="display:none"  name="dPath" />
+                                    </div>
+
+                                    <div style = "margin-top: 15px">
+                                        <label style="width:30%">Adv attack</label>
+                                        <select class="form-control" style="width:65%" name="aAttack">
+                                            <option>None</option>
+                                            <option>FGSM</option>
+                                            <option>BIM</option>
+                                        </select>
+                                    </div>
+                                    <div style = "margin-top: 15px">
+                                        <label style="width:30%">Data size</label>
+                                        <select class="form-control" style="width:65%" name="dSize" >
+                                          <option>10%</option>
+                                          <option>20%</option>
+                                          <option>30%</option>
+                                          <option>40%</option>
+                                          <option>50%</option>
+                                          <option>60%</option>
+                                          <option>70%</option>
+                                          <option>80%</option>
+                                          <option>90%</option>
+                                          <option>100%</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <center><input style = "margin-top: 10px" type="button" class="btn btn-danger btn-fill btn-lg" value="Diagnose" onclick="Diagnose()"></center>
+{#                                <center><input style = "margin-top: 10px" type="button" class="btn btn-danger btn-fill btn-lg" value="Diagnose" onclick="window.location.href='/result' "></center>#}
+                            </form>
+                        </div>
+                        <div class="col-lg-2"></div>
+
+{#                        <form class="form-inline" role="form" action="/index" method="post" id ="form1" >#}
+{#                          <div class="form-group">#}
+{#                              <label class="sr-only" for="exampleInputEmail2">noise</label>#}
+{#                                <label for="name">Noise degree</label>#}
+{#                                    <select class="form-control">#}
+{#                                      <option>1</option>#}
+{#                                      <option>2</option>#}
+{#                                      <option>3</option>#}
+{#                                      <option>4</option>#}
+{#                                      <option>5</option>#}
+{#                                    </select>#}
+{#                          </div>#}
+{#                          <div class="form-group">#}
+{#                              <label class="sr-only" for="exampleInputEmail2">noise1</label>#}
+{#                                <select class="form-control">#}
+{#                                  <option>1</option>#}
+{#                                  <option>2</option>#}
+{#                                  <option>3</option>#}
+{#                                  <option>4</option>#}
+{#                                  <option>5</option>#}
+{#                                </select>#}
+{#                          </div>#}
+{#                          <div class="form-group input-group-lg" style="width:60%">#}
+{#                            <label class="sr-only" for="exampleInputEmail2">query</label>#}
+{#                            <input type="text" class="form-control transparent" placeholder="Your query here..." name="query" value="" id="query1" onkeypress="getKey();">#}
+{#                            <input style='display:none' />#}
+{#                          </div>#}
+{#                          <br>#}
+{#                          <center><input type="button" class="btn btn-danger btn-fill btn-lg" value="Diagnose" onclick="Diagnose()"></center>#}
+{#                        </form>#}
+
+                    </div>
+                </div>
+            </div>
+{#            <div class="col-md-12 col-md-offset-2">#}
+{#            <br><br><br>#}
+{#            <h4 style="color:white">EXAMPLE: </h4>#}
+{#            <p style="color:white">Resolving ip-address of a hostname?</p>#}
+{#            <p style="color:white">How to make a list thread-safe for serialization?</p>#}
+{#            <p style="color:white">How to check whether a class exists?</p>#}
+{#            <p style="color:white">Is there any way to fnd os name using java?</p>#}
+{#            <p style="color:white">Java Fastest way to read through text fle with 2 million lines?</p>#}
+{#            </div>#}
+        </div>
+    </div>
+    <div class="footer">
+      <div class="container">
+             Tool by AID Team.
+      </div>
+    </div>
+ </div>
+ </body>
+   <script src="/static/js/jquery-1.10.2.js" type="text/javascript"></script>
+   <script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
+
+</html>

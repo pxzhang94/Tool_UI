@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="text/html; charset=utf-8" />
+    
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+    
+    <title>AID</title>
+    
+    <link href="/static/css/bootstrap.css" rel="stylesheet" />
+    <link href="/static/css/coming-sssoon.css" rel="stylesheet" />    
+    
+    <!--     Fonts     -->
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Grand+Hotel' rel='stylesheet' type='text/css'>
+    
+</head>
+<script type="text/javascript">
+    window.onload = choosePic;
+    function choosePic() {
+        {#var files = getAllFiles("/static/advs/{{result['adv_path']}}");#}
+        var files = "{{adv_files}}";
+        files = files.replaceAll("&#39;", "")
+        files = files.slice(1,-1).split(", ")
+        var randomNum = Math.floor((Math.random() * files.length));
+
+        let advPath = "/static/advs/{{result['adv_path']}}/"
+        advPath = advPath + files[randomNum];
+        document.getElementById("advImage").src = advPath;
+
+        let originalPath = "/static/datasets/{{data_name}}/test/images/"
+        originalPath = originalPath + files[randomNum].split("_")[0] + ".png";
+        document.getElementById("originalImage").src = originalPath;
+
+        let noisePath = "/static/noises/{{result['adv_path']}}/"
+        noisePath = noisePath + files[randomNum];
+        document.getElementById("noiseImage").src = noisePath;
+
+        document.getElementById("advLabel").innerHTML = "Adv. Image (" + files[randomNum].split("_")[1] + ")";
+    }
+
+    function Diagnose2() {
+        document.getElementById("form2").submit();
+        return true;
+    }
+    
+    function getKey(){
+    	if(event.keyCode==13){
+            Search();
+        }
+	}
+
+	function set_placeholder(e) {
+        var filename = $(e).val();
+        if (filename) {
+            var idx = filename.lastIndexOf("\\");
+            filename = filename.substring(idx + 1);
+            {#$(e).parent().prev().prop("placeholder", filename);#}
+            $(e).prev().prop("placeholder", filename);
+        }
+    }
+
+    function monitor_upload(e) {
+        $(e).next().click();
+    }
+
+</script>
+    
+<body>
+<nav class="navbar navbar-transparent navbar-fixed-top" role="navigation">  
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+      <ul class="nav navbar-nav navbar-right">
+             <li>
+                 <a href="/contact" target="_Self" style="color:#000;">
+                    <i class="fa fa-envelope-o"></i>
+                    Contact
+                </a>
+            </li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+         <li class="dropdown">
+              <a href="/" style="color:#000;">
+                <i class="fa fa-home"></i>
+                AID
+              </a>
+        </li>
+      </ul>
+      
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container -->
+</nav>
+{#<div class="main" style="background-image: url('/static/images/default.jpg')">#}
+<div class="main" style="background-image: none">
+
+{#    <div class="cover black" data-color="black"></div>#}
+     
+<!--   You can change the black color for the filter with those colors: blue, green, red, orange       -->
+
+    <div class="container">
+        <div class="content">
+            <div class="subscribe">
+                <div class="row">
+{#                    TODO: form->navbar form#}
+                    <div class="col-lg-12">
+                        <div class="col-lg-2"></div>
+                        <div class="col-lg-8">
+                            <form class="form-inline" role="form" action="/index" method="post" id ="form2" >
+                                <div class="form-group col-lg-10" style="width:50%">
+                                    <div style = "margin-top: 100px">
+                                        <input type="text" class="form-control" style="display:none" value="{{ params["mPath"] }}" name="mPath" />
+                                        <label style="width:30%">Random noise</label>
+                                        <select class="form-control" style="width:65%" name="rNoise">
+                                          <option>None</option>
+                                          <option>Gaussian noise</option>
+                                        </select>
+                                    </div>
+                                    <div style = "margin-top: 15px">
+                                        <label style="width:30%">Noise degree</label>
+{#                                        TODO: dynamic degree for different perturbation#}
+                                        <select class="form-control" style="width:65%"  name="rParam">
+                                            <option>0.1</option>
+                                            <option>0.2</option>
+                                            <option>0.3</option>
+                                            <option>0.4</option>
+                                            <option>0.5</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-lg-10" style="width:50%">
+                                    <input type="text" class="form-control" style="display:none" value="{{ params["dPath"] }}"  name="dPath" />
+                                    <div style = "margin-top: 100px">
+                                        <label style="width:30%">Adv attack</label>
+                                        <select class="form-control" style="width:65%" name="aAttack">
+                                            <option>None</option>
+                                            <option>FGSM</option>
+                                            <option>BIM</option>
+                                        </select>
+                                    </div>
+                                    <div style = "margin-top: 15px">
+                                        <label style="width:30%">Data size</label>
+                                        <select class="form-control" style="width:65%" name="dSize">
+                                            <option>10%</option>
+                                            <option>20%</option>
+                                            <option>30%</option>
+                                            <option>40%</option>
+                                            <option>50%</option>
+                                            <option>60%</option>
+                                            <option>70%</option>
+                                            <option>80%</option>
+                                            <option>90%</option>
+                                            <option>100%</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <center><input style = "margin-top: 10px" type="button" class="btn btn-danger btn-fill btn-lg" value="Diagnose" onclick="Diagnose2()"></center>
+                            </form>
+                        </div>
+                        <div class="col-lg-2"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="subscribe">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="col-lg-2"></div>
+                        <div class="col-lg-8">
+                            <div style="text-align: center">
+                                <h3>AID Report</h3>
+                                <h6>Produced by AI Diagnose Team</h6>
+                            </div>
+                            <hr style="height:1px;border:none;border-top:1px solid #555555;" />
+                            <div style="text-align: center"  onclick="choosePic()">
+                                <h4>Noise Data Example</h4>
+{#                                TODO: 1.fix path; 2.caculate the second result; 3.click and random change#}
+                                <div class="col-lg-4">
+                                    <img src="/static/images/apple-icon.png" width="128" height="128" id="originalImage"/>
+                                    <p>Ori. Image</p>
+                                </div>
+                                <div class="col-lg-4">
+                                    <img src="/static/images/apple-icon.png" width="128" height="128" id="noiseImage"/>
+                                    <p>Noise</p>
+                                </div>
+                                <div class="col-lg-4">
+                                    <img src="/static/images/apple-icon.png" width="128" height="128" id="advImage"/>
+                                    <p id="advLabel">Adv. Image</p>
+                                </div>
+                            </div>
+
+                            <hr style="width: 100%;height:1px;border:none;border-top:1px solid #555555;" />
+
+                            <div>
+                                <h4 style="text-align: center">Accuracy</h4>
+                                <div class="col-lg-3">
+                                    <label style="margin-bottom: 20px">Original accuracy</label>
+                                    <label style="margin-bottom: 20px">Adversarial accuracy</label>
+                                </div>
+                                <div class="col-lg-9">
+{#                                    TODO: dynamic width and text;document.getElementById("id").style.width="value"#}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['original_acc']}}" aria-valuemin="0" aria-valuemax="100" style="width:{{result['original_acc']}}%" id="original_acc">
+                                          {{result['original_acc']}}%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['current_acc']}}" aria-valuemin="0" aria-valuemax="100" style="width:{{result['current_acc']}}%">
+                                          {{result['current_acc']}}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr style="width: 100%;height:1px;border:none;border-top:1px solid #555555;" />
+
+                            <div>
+                                <h4 style="text-align: center;margin-bottom:20px">Metrics</h4>
+                                <div class="col-lg-3">
+                                    {% set tCount = 0 %}
+                                    {% if "ncV" in result %}
+                                        {% set tCount = tCount + 1 %}
+                                    <label style="margin-bottom: 20px">NC</label>
+                                    {% endif %}
+                                    {% if "kncV" in result %}
+                                        {% set tCount = tCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">KNC</label>
+                                    {% endif %}
+                                    {% if "tkncV" in result %}
+                                        {% set tCount = tCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">TKNC</label>
+                                    {% endif %}
+                                    {% set tCount = tCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">SNAC</label>
+                                    {% set tCount = tCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">NBC</label>
+                                    {% set tCount = tCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">LSA</label>
+                                    {% set tCount = tCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">DSA</label>
+{#                                    {% if "dsaV" in result %}#}
+{#                                        {% set tCount = tCount + 1 %}#}
+{#                                    <br>#}
+{#                                    <label style="margin-bottom: 20px">DSA</label>#}
+{#                                    {% endif %}#}
+                                </div>
+
+                                <div class="col-lg-9">
+{#                                    TODO: dynamic width and text;document.getElementById("id").style.width="value"#}
+                                    {% if "ncV" in result %}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['ncV']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #05AE0E);width:{{result['ncV']}}%">
+                                          {{result['ncV']}}%
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if "kncV" in result %}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['kncV']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #05AE0E);width:{{result['kncV']}}%">
+                                          {{result['kncV']}}%
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if "tkncV" in result %}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['tkncV']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #05AE0E);width:{{result['tkncV']}}%">
+                                          {{result['tkncV']}}%
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=13.36 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #05AE0E);width:13.36%">
+                                          13.36%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=11.44 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #05AE0E);width:11.44%">
+                                          11.44%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=53.61 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #05AE0E);width:53.61%">
+                                          53.61%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=67.00 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #05AE0E);width:67.00%">
+                                          67.00%
+                                        </div>
+                                    </div>
+{#                                    {% if "dsaV" in result %}#}
+{#                                    <div class="progress">#}
+{#                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['dsaV']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #05AE0E, #FFFFFF);width:{{result['dsaV']}}%">#}
+{#                                          {{result['dsaV']}}%#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    {% endif %}#}
+                                </div>
+
+                                {% set tStyle = 20 + 40 * tCount %}
+{#                                <div style="background: #05AE0E;margin-top: {{ tStyle }}px" >#}
+                                <div style="margin-top: {{ tStyle }}px; border:3px solid #05AE0E; padding-left:5px">
+                                    <span style="font-size: 24px">{{summary['testing_summary']}}</span>
+                                </div>
+
+                                <div class="col-lg-3" style="margin-top: 20px">
+                                    {% set aCount = 0 %}
+                                    {% if "nteV" in result %}
+                                        {% set aCount = aCount + 1 %}
+                                    <label style="margin-bottom: 20px">NTE</label>
+                                    {% endif %}
+                                    {% if "acacV" in result %}
+                                        {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">ACAC</label>
+                                    {% endif %}
+                                    {% if "ald2V" in result %}
+                                        {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">ALD2</label>
+                                    {% endif %}
+                                    {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">ACTC</label>
+                                    {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">ALD0</label>
+                                    {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">ALD1</label>
+                                    {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">ALDinf</label>
+                                    {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">ASS</label>
+                                    {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">PSD</label>
+                                    {% set aCount = aCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">RGB</label>
+                                </div>
+
+                                <div class="col-lg-9" style="margin-top: 20px">
+{#                                    TODO: dynamic width and text;document.getElementById("id").style.width="value"#}
+                                    {% if "nteV" in result %}
+                                    <div class="progress">
+                                        <div class= "progress-bar" role="progressbar" aria-valuenow="{{result['nteV']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FF6A6A, #FFFFFF);width:{{result['nteV']}}%">
+                                          {{result['nteV']}}%
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if "acacV" in result %}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['acacV']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #FF6A6A);width:{{result['acacV']}}%">
+                                          {{result['acacV']}}%
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if "ald2V" in result %}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['ald2V']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FF6A6A, #FFFFFF);width:{{result['ald2V']}}%">
+                                          {{result['ald2V']}}%
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=35.4 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #FF6A6A);width:35.42%">
+                                          35.42%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=60.69 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #FF6A6A);width:60.69%">
+                                          60.69%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=23.84 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #FF6A6A);width:23.84%">
+                                          23.84%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=57.00 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #FF6A6A);width:57.00%">
+                                          57.00%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=55.25 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FF6A6A, #FFFFFF);width:55.25%">
+                                          55.25%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=71.83 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #FF6A6A);width:71.83%">
+                                          71.83%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=87.65 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FF6A6A, #FFFFFF);width:87.65%">
+                                          87.65%
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% set aStyle = 20 + 40 * aCount %}
+{#                                <div style="background: #FF6A6A;margin-top: {{ aStyle }}px" >#}
+                                <div style="margin-top: {{ aStyle }}px; border:3px solid #FF6A6A; padding-left:5px">
+                                    <span style="font-size: 24px">{{summary['attack_summary']}}</span>
+                                </div>
+
+                                <div class="col-lg-3" style="margin-top: 20px">
+                                    {% set rCount = 0 %}
+                                    {% if "lcV" in result %}
+                                        {% set rCount = rCount + 1 %}
+                                    <label style="margin-bottom: 20px">LC</label>
+                                    {% endif %}
+{#                                    {% if "cl1V" in result %}#}
+{#                                        {% set rCount = rCount + 1 %}#}
+{#                                    <br>#}
+{#                                    <label style="margin-bottom: 20px">CL1</label>#}
+{#                                    {% endif %}#}
+                                    {% set rCount = rCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">CL1</label>
+                                    {% set rCount = rCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">CL2</label>
+                                    {% set rCount = rCount + 1 %}
+                                    <br>
+                                    <label style="margin-bottom: 20px">CLinf</label>
+                                </div>
+
+                                <div class="col-lg-9" style="margin-top: 20px">
+{#                                    TODO: dynamic width and text;document.getElementById("id").style.width="value"#}
+                                    {% if "lcV" in result %}
+                                    <div class="progress">
+                                        <div class= "progress-bar" role="progressbar" aria-valuenow="{{result['lcV']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFA500, #FFFFFF);width:{{result['lcV']}}%">
+                                          {{result['lcV']}}%
+                                        </div>
+                                    </div>
+                                    {% endif %}
+{#                                    {% if "cl1V" in result %}#}
+{#                                    <div class="progress">#}
+{#                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{result['cl1V']}}" aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFFFFF, #FFA500);width:{{result['cl1V']}}%">#}
+{#                                          {{result['cl1V']}}%#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    {% endif %}#}
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=25.31 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFA500, #FFFFFF);width:25.31%">
+                                          25.31%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=15.12 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFA500, #FFFFFF);width:15.12%">
+                                          15.12%
+                                        </div>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow=13.51 aria-valuemin="0" aria-valuemax="100" style="background: linear-gradient(90deg, #FFA500, #FFFFFF);width:13.51%">
+                                          13.51%
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% set rStyle = 20 + 40 * rCount %}
+{#                                <div style="background: #FFA500;margin-top: {{ rStyle }}px; margin-bottom:50px" >#}
+                                <div style="margin-top: {{ rStyle }}px; border:3px solid #FFA500; padding-left:5px">
+                                    <span style="font-size: 24px">{{summary['robustness_summary']}}</span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-2"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="footer">
+    <div class="container">
+             Tool by AID Team.
+    </div>
+</div>
+
+{#<footer style="margin-bottom: 20px">#}
+{#    <div class="col-lg-8 col-lg-offset-2">#}
+{#        <center>Tool demo for AID, by AI Diagnosis Team.</center>#}
+{#    </div>#}
+{#</footer>#}
+</body>
+   <script src="/static/js/jquery-1.10.2.js" type="text/javascript"></script>
+   <script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
+
+</html>
